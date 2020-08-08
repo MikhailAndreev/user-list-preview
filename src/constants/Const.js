@@ -1,0 +1,1 @@
+export const API_ORIGIN = 'https://userslist-preview.firebaseio.com/'

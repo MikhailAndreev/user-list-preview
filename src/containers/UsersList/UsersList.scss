@@ -1,0 +1,42 @@
+
+.user-list.ant-row {
+  width: 100%;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-list-wrapper {
+  width: 70%;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+.title {
+  color: red;
+}
+
+.sort-section.ant-row {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.sort-section .ant-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
+  & .ant-radio-group {
+    margin: 0 0 5px 0;
+  }
+}
+
+.table-container.container {
+  width: 100%;
+  padding: 0 30px;
+}
