@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import * as userListActions from "../../store/actions/userList";
 import { connect } from "react-redux";
+import { Row, Col, Radio, Skeleton } from "antd";
+
 
 import "./UsersList.scss";
-import { Row, Col, Radio, Skeleton } from "antd";
 import UserTable from "./UserTable/UserTable";
 import SortHelper from "../../utils/sortHelper";
 
@@ -39,26 +40,37 @@ const viewOptions = [
 
 class UsersList extends Component {
   state = {
-    sortValues: {
+    sort: {
       sortValue: "id",
       ascendingValue: "ascending",
       viewValue: "tableView",
     },
-
+    queryString: "",
+    filter: { filterString: "" },
     tableData: null,
-  };
-  handleClick = () => {
-    console.log("click is happen");
-    this.props.startIncrement(1);
   };
 
   componentDidMount() {
+    const { sort, filter } = this.state;
+    const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+    const initialParams = { ...sort};
+    if (queryParams) {
+      this.props.history.push(this.makeQueryParams(queryParams));
+      this.setState({
+        sort: { ...queryParams["sort"] },
+        filter: { ...queryParams["filter"] },
+      });
+    } else {
+      this.props.history.push(this.makeQueryParams(initialParams));
+      localStorage.setItem("queryParams", JSON.stringify(initialParams));
+    }
+
     this.props.fetchUsers();
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("from update", this.state);
     if (prevProps.userListData !== this.props.userListData) {
+      this.defineSorting(this.state.sort);
       this.setState({
         tableData: this.props.userListData,
       });
@@ -66,26 +78,26 @@ class UsersList extends Component {
   }
 
   defineSorting = (val) => {
-    const { tableData } = this.state;
+    const { userListData } = this.props;
     let sortedData = null;
     switch (val.sortValue) {
       case "id":
         // sort by id
-        sortedData = SortHelper.sortById(val.ascendingValue, tableData);
+        sortedData = SortHelper.sortById(val.ascendingValue, userListData);
         this.setState({
           tableData: [...sortedData],
         });
         break;
       case "name":
         // sort by name
-        sortedData = SortHelper.sortByName(val.ascendingValue, tableData);
+        sortedData = SortHelper.sortByName(val.ascendingValue, userListData);
         this.setState({
           tableData: [...sortedData],
         });
         break;
       case "age":
         // sort by age
-        sortedData = SortHelper.sortByAge(val.ascendingValue, tableData);
+        sortedData = SortHelper.sortByAge(val.ascendingValue, userListData);
         this.setState({
           tableData: [...sortedData],
         });
@@ -93,18 +105,51 @@ class UsersList extends Component {
       default:
         break;
     }
+    ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
+    const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+    let newUrl = null;
+    if (queryParams) {
+      queryParams["sort"] = { ...val };
+      localStorage.setItem("queryParams", JSON.stringify(queryParams));
+      newUrl = queryParams;
+    } else {
+      newUrl = { sort: { ...val } };
+    }
+    ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
+
+    ///////// Меняем значение поисковой строки на новое /////////////////
+
+    this.props.history.push(this.makeQueryParams(newUrl));
+
+    ///////// Меняем значение поисковой строки на новое /////////////////
+  };
+
+  makeQueryParams = (data) => {
+    const qs = new URLSearchParams();
+    if (data) {
+      const keys = Object.keys(data);
+      for (let i = 0; i < keys.length; i++) {
+        const values = Object.values(data[keys[i]]);
+        qs.append([keys[i]], values.join("-"));
+      }
+    }
+    const newUrl = {
+      pathname: "/",
+      search: qs.toString(),
+    };
+    return newUrl;
   };
 
   handleSortChange = (e) => {
     // менять сортировку по data-index добавить у Radio data-index
     const sortTarget = e.target["data-sort"];
     const sortValue = e.target.value;
-    const updSortValues = this.state.sortValues;
+    const updSortValues = this.state.sort;
     updSortValues[sortTarget] = sortValue;
     this.defineSorting(updSortValues);
 
     this.setState({
-      sortValues: { ...updSortValues },
+      sort: { ...updSortValues },
     });
   };
 
@@ -119,7 +164,7 @@ class UsersList extends Component {
 
   render() {
     const {
-      sortValues: { sortValue, ascendingValue, viewValue },
+      sort: { sortValue, ascendingValue, viewValue },
       tableData,
     } = this.state;
     const { showPreloader } = this.props;
