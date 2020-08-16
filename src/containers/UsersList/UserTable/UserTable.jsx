@@ -13,21 +13,31 @@ class UserTable extends Component {
   state = {
     searchText: "",
     searchedColumn: "",
-    filterValues: "",
+    filterValue: "",
   };
 
   componentDidMount() {
-    const filterValues = JSON.parse(localStorage.getItem("filterValues"));
-    if(filterValues) {
-      console.log('from ls ', filterValues);
-    }
+    const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+    // if ( queryParams && queryParams["filter"]) {
+    //   // console.log('from ls ', filterValues);
+    //   const filterValue = queryParams["filter"]["filterString"];
+    //   console.log("from MOUNT", filterValue);
+    //   this.setState({
+    //     filterValue: [filterValue],
+    //   });
+    // }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log("from UPDATE", this.state.filterValue);
   }
 
   handleSearch = (selectedKeys, confirm, dataIndex) => {
-    console.log('from search keys', selectedKeys);
-    console.log('from search index', dataIndex);
+    // console.log('from search keys', selectedKeys[0]);
+    // console.log('from search index', dataIndex);
     confirm();
-    localStorage.setItem("filterValues", JSON.stringify([selectedKeys[0]]));
+    // localStorage.setItem("filterValues", JSON.stringify([selectedKeys[0]]));
+    this.props.getFilterValue(selectedKeys[0]);
     this.setState({
       searchText: selectedKeys[0],
       searchedColumn: dataIndex,
@@ -116,7 +126,14 @@ class UserTable extends Component {
   };
 
   render() {
+    const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+    let val = null;
+    if (queryParams && queryParams["filter"]) {
+      const filterValue = queryParams["filter"]["filterString"];
+      val = [filterValue];
+    }
     const { userData } = this.props;
+    const { filterValue } = this.state;
     const columns = [
       {
         title: "ID",
@@ -140,6 +157,7 @@ class UserTable extends Component {
         title: "Name",
         dataIndex: "name",
         key: "name",
+        defaultFilteredValue: val,
         // render: (text, record) => (
         //   <>
         //     {record && (
@@ -176,6 +194,7 @@ class UserTable extends Component {
     };
     return (
       <>
+        <p>HELLO FROM filter value!!! {filterValue}</p>
         <Table {...tableData} />
       </>
     );

@@ -3,7 +3,6 @@ import * as userListActions from "../../store/actions/userList";
 import { connect } from "react-redux";
 import { Row, Col, Radio, Skeleton } from "antd";
 
-
 import "./UsersList.scss";
 import UserTable from "./UserTable/UserTable";
 import SortHelper from "../../utils/sortHelper";
@@ -53,7 +52,7 @@ class UsersList extends Component {
   componentDidMount() {
     const { sort, filter } = this.state;
     const queryParams = JSON.parse(localStorage.getItem("queryParams"));
-    const initialParams = { ...sort};
+    const initialParams = { ...sort };
     if (queryParams) {
       this.props.history.push(this.makeQueryParams(queryParams));
       this.setState({
@@ -61,16 +60,37 @@ class UsersList extends Component {
         filter: { ...queryParams["filter"] },
       });
     } else {
-      this.props.history.push(this.makeQueryParams(initialParams));
-      localStorage.setItem("queryParams", JSON.stringify(initialParams));
+      this.props.history.push(
+        this.makeQueryParams({ sort: { ...initialParams } })
+      );
+      localStorage.setItem(
+        "queryParams",
+        JSON.stringify({ sort: { ...initialParams } })
+      );
     }
 
     this.props.fetchUsers();
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.userListData !== this.props.userListData) {
+    if (this.state.tableData && prevState.sort !== this.state.sort) {
       this.defineSorting(this.state.sort);
+    }
+    if (this.state.tableData && prevState.filter !== this.state.filter) {
+      ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
+      const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+      let newUrl = null;
+      if (queryParams) {
+        queryParams["filter"] = {}; // если не создать таким образом пишет что нет такой property как filter
+        queryParams["filter"]["filterString"] = this.state.filter.filterString;
+        localStorage.setItem("queryParams", JSON.stringify(queryParams));
+        newUrl = queryParams;
+      }
+      this.props.history.push(this.makeQueryParams({ ...queryParams }));
+
+      ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
+    }
+    if (prevProps.userListData !== this.props.userListData) {
       this.setState({
         tableData: this.props.userListData,
       });
@@ -111,7 +131,8 @@ class UsersList extends Component {
     if (queryParams) {
       queryParams["sort"] = { ...val };
       localStorage.setItem("queryParams", JSON.stringify(queryParams));
-      newUrl = queryParams;
+      // newUrl = queryParams;
+      newUrl = { sort: { ...val } };
     } else {
       newUrl = { sort: { ...val } };
     }
@@ -138,6 +159,12 @@ class UsersList extends Component {
       search: qs.toString(),
     };
     return newUrl;
+  };
+
+  getFilterValue = (val) => {
+    this.setState({
+      filter: { filterString: val },
+    });
   };
 
   handleSortChange = (e) => {
@@ -206,7 +233,10 @@ class UsersList extends Component {
             {showPreloader ? (
               <Skeleton active />
             ) : (
-              <UserTable userData={tableData} />
+              <UserTable
+                getFilterValue={this.getFilterValue}
+                userData={tableData}
+              />
             )}
           </div>
         </Row>
