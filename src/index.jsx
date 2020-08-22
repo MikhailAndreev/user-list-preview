@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 import { createStore, combineReducers, applyMiddleware, compose } from "redux";
 import { Provider } from "react-redux";
-import 'antd/dist/antd.css';
+import "antd/dist/antd.css";
 
 import App from "./containers/App";
 import { loadState, saveState } from "./utils/localeStorage";
@@ -40,9 +40,7 @@ const persistedState = loadState();
 
 const app = (
   <Provider store={store}>
-    <HashRouter>
-      <App />
-    </HashRouter>
+    <App />
   </Provider>
 );
 
