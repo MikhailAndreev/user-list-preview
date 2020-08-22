@@ -162,6 +162,10 @@ class UsersList extends Component {
   };
 
   getFilterValue = (val) => {
+    let filter = null;
+    if (val) {
+      filter = val;
+    }
     this.setState({
       filter: { filterString: val },
     });
@@ -193,6 +197,7 @@ class UsersList extends Component {
     const {
       sort: { sortValue, ascendingValue, viewValue },
       tableData,
+      filter: { filterString },
     } = this.state;
     const { showPreloader } = this.props;
     const renderSortButtons = this.prepareOptions(sortOptions);
@@ -236,6 +241,7 @@ class UsersList extends Component {
               <UserTable
                 getFilterValue={this.getFilterValue}
                 userData={tableData}
+                // filterValue={filterString}
               />
             )}
           </div>

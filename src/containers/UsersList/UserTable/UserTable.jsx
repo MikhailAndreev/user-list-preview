@@ -16,27 +16,12 @@ class UserTable extends Component {
     filterValue: "",
   };
 
-  componentDidMount() {
-    const queryParams = JSON.parse(localStorage.getItem("queryParams"));
-    // if ( queryParams && queryParams["filter"]) {
-    //   // console.log('from ls ', filterValues);
-    //   const filterValue = queryParams["filter"]["filterString"];
-    //   console.log("from MOUNT", filterValue);
-    //   this.setState({
-    //     filterValue: [filterValue],
-    //   });
-    // }
-  }
+  componentDidMount() {}
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("from UPDATE", this.state.filterValue);
-  }
+  componentDidUpdate(prevProps, prevState, snapshot) {}
 
   handleSearch = (selectedKeys, confirm, dataIndex) => {
-    // console.log('from search keys', selectedKeys[0]);
-    // console.log('from search index', dataIndex);
     confirm();
-    // localStorage.setItem("filterValues", JSON.stringify([selectedKeys[0]]));
     this.props.getFilterValue(selectedKeys[0]);
     this.setState({
       searchText: selectedKeys[0],
@@ -125,13 +110,17 @@ class UserTable extends Component {
     });
   };
 
-  render() {
+  getFilterFromLs = () => {
     const queryParams = JSON.parse(localStorage.getItem("queryParams"));
     let val = null;
     if (queryParams && queryParams["filter"]) {
       const filterValue = queryParams["filter"]["filterString"];
       val = [filterValue];
     }
+    return val;
+  };
+
+  render() {
     const { userData } = this.props;
     const { filterValue } = this.state;
     const columns = [
@@ -157,20 +146,7 @@ class UserTable extends Component {
         title: "Name",
         dataIndex: "name",
         key: "name",
-        defaultFilteredValue: val,
-        // render: (text, record) => (
-        //   <>
-        //     {record && (
-        //       <>
-        //         <Avatar size={25} src={getPicture(record.image)} />
-        //         <p style={{ display: "inline-block", marginLeft: 5 }}>
-        //           {" "}
-        //           {text}
-        //         </p>
-        //       </>
-        //     )}
-        //   </>
-        // ),
+        defaultFilteredValue: this.getFilterFromLs(),
         ...this.getColumnSearchProps("name"),
       },
       {
@@ -194,7 +170,6 @@ class UserTable extends Component {
     };
     return (
       <>
-        <p>HELLO FROM filter value!!! {filterValue}</p>
         <Table {...tableData} />
       </>
     );
