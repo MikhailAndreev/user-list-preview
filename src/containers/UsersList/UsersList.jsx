@@ -73,12 +73,15 @@ class UsersList extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    const { sort } = this.state;
     if (this.state.tableData && prevState.sort !== this.state.sort) {
       this.defineSorting(this.state.sort);
+      this.props.history.push(this.makeQueryParams({ sort: { ...sort } }));
     }
     if (this.state.tableData && prevState.filter !== this.state.filter) {
       ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
       const queryParams = JSON.parse(localStorage.getItem("queryParams"));
+
       let newUrl = null;
       if (queryParams) {
         queryParams["filter"] = {}; // если не создать таким образом пишет что нет такой property как filter
@@ -91,6 +94,7 @@ class UsersList extends Component {
       ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
     }
     if (prevProps.userListData !== this.props.userListData) {
+      this.defineSorting(this.state.sort);
       this.setState({
         tableData: this.props.userListData,
       });
@@ -140,7 +144,7 @@ class UsersList extends Component {
 
     ///////// Меняем значение поисковой строки на новое /////////////////
 
-    this.props.history.push(this.makeQueryParams(newUrl));
+    // this.props.history.push(this.makeQueryParams(newUrl));
 
     ///////// Меняем значение поисковой строки на новое /////////////////
   };
@@ -185,8 +189,8 @@ class UsersList extends Component {
   };
 
   prepareOptions = (dataOptions) => {
-    const renderOptions = dataOptions.map((opt) => (
-      <Radio.Button data-sort={opt.dataSet} value={opt.value}>
+    const renderOptions = dataOptions.map((opt, index) => (
+      <Radio.Button key={index} data-sort={opt.dataSet} value={opt.value}>
         {opt.label}
       </Radio.Button>
     ));
