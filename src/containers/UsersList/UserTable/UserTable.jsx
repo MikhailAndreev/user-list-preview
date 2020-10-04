@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Table, Avatar, Input, Space, Button, Highlighter } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import cn from "classnames";
+import SubscribeStar from "../SubscribeStar";
 
 const pathToImg = "@images/";
 
@@ -14,6 +16,7 @@ class UserTable extends Component {
     searchText: "",
     searchedColumn: "",
     filterValue: "",
+    isFavourite: false,
   };
 
   componentDidMount() {}
@@ -31,6 +34,7 @@ class UserTable extends Component {
 
   handleReset = (clearFilters) => {
     clearFilters();
+    this.props.getFilterValue([]);
     this.setState({ searchText: "" });
   };
 
@@ -120,6 +124,21 @@ class UserTable extends Component {
     return val;
   };
 
+  handleStarActive = (userId) => {
+    const { handleAddFavorite, handleDeleteFavorite } = this.props;
+    const isFavourite = this.isFavourite(userId);
+    if (isFavourite ) {
+      handleDeleteFavorite(userId);
+    } else {
+      handleAddFavorite(userId);
+    }
+  };
+
+  isFavourite = (id) => {
+    const { favoriteList } = this.props;
+    return favoriteList.find((favUser) => favUser.id === id);
+  };
+
   render() {
     const { userData } = this.props;
     const { filterValue } = this.state;
@@ -160,6 +179,22 @@ class UserTable extends Component {
         dataIndex: "phone",
         key: "phone",
       },
+      {
+        // title: "Phone",
+        dataIndex: "favourite",
+        key: "favourite",
+        render: (text, record) => (
+          <>
+            <SubscribeStar
+              class={cn({
+                "favorite-icon": !this.isFavourite(record.id),
+                "favorite-icon active": this.isFavourite(record.id),
+              })}
+              handleClick={() => this.handleStarActive(record.id)}
+            />
+          </>
+        ),
+      },
     ];
     const tableData = {
       dataSource: userData && this.prepareTableData(userData),
@@ -168,11 +203,7 @@ class UserTable extends Component {
       pagination: false,
       // scroll: { y: "calc(100% - 60px)" },
     };
-    return (
-      <>
-        <Table {...tableData} />
-      </>
-    );
+    return <Table {...tableData} />;
   }
 }
 

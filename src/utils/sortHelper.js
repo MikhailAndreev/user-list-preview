@@ -1,5 +1,4 @@
 class SortHelper {
-
   sortById(ascendingVal, data) {
     // ascendingVal - значение по возрастанию или по убыванию
     let sortedData = data;
@@ -44,7 +43,7 @@ class SortHelper {
     }
     return sortedData;
   };
-  
+
   sortByAge = (ascendingVal, data) => {
     let sortedData = data;
     if (ascendingVal === "ascending") {
@@ -71,6 +70,15 @@ class SortHelper {
     return sortedData;
   };
 
+  sortByVideo = (a, b) => {
+    if (!!a.video > !!b.video) {
+      return -1;
+    }
+    if (!!a.video < !!b.video) {
+      return 1;
+    }
+    return 0;
+  };
 }
 
 const instance = new SortHelper();

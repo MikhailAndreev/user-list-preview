@@ -26,3 +26,7 @@ export const fetchUsers = () => {
       });
   };
 };
+
+
+export const addUserToFavorite = createAction("ADD_USER_TO_FAVORITE");
+export const deleteUserFromFavorite = createAction("DELETE_USER_FROM_FAVORITE");

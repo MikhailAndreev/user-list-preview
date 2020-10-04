@@ -6,19 +6,23 @@ import { Row, Col, Radio, Skeleton } from "antd";
 import "./UsersList.scss";
 import UserTable from "./UserTable/UserTable";
 import SortHelper from "../../utils/sortHelper";
+import UserPreviewCard from "./UserPreviewCard";
 
 const mapStateToProps = (state) => {
   const {
-    usersListReducer: { userListData },
+    usersListReducer: { userListData, favoriteList },
     appSettingsReducer: { showPreloader },
   } = state;
   return {
     userListData,
     showPreloader,
+    favoriteList,
   };
 };
 const actionCreators = {
   fetchUsers: userListActions.fetchUsers,
+  addUserToFavorite: userListActions.addUserToFavorite,
+  deleteUserFromFavorite: userListActions.deleteUserFromFavorite,
 };
 
 const sortOptions = [
@@ -141,12 +145,6 @@ class UsersList extends Component {
       newUrl = { sort: { ...val } };
     }
     ////////// Записываем после выбора ЧЕКБОКСА значение в LS ////////////
-
-    ///////// Меняем значение поисковой строки на новое /////////////////
-
-    // this.props.history.push(this.makeQueryParams(newUrl));
-
-    ///////// Меняем значение поисковой строки на новое /////////////////
   };
 
   makeQueryParams = (data) => {
@@ -203,10 +201,35 @@ class UsersList extends Component {
       tableData,
       filter: { filterString },
     } = this.state;
-    const { showPreloader } = this.props;
+    const {
+      showPreloader,
+      addUserToFavorite,
+      deleteUserFromFavorite,
+      favoriteList,
+    } = this.props;
     const renderSortButtons = this.prepareOptions(sortOptions);
     const renderSortButtonsByIncrease = this.prepareOptions(byIncreaseOptions);
     const renderPreviewButtons = this.prepareOptions(viewOptions);
+    let renderPreviewCard = null;
+
+    if (tableData) {
+      renderPreviewCard = tableData.map((user, index) => {
+        const isFavorite = favoriteList.find(
+          (favUser) => favUser.id === user.id
+        );
+        return (
+          <UserPreviewCard
+            key={index}
+            type={user.video ? "preview" : "default"}
+            user={user}
+            handleAddFavorite={() => addUserToFavorite(user.id)}
+            handleDeleteFavorite={() => deleteUserFromFavorite(user.id)}
+            isFavorite={isFavorite}
+          />
+        );
+      });
+    }
+
     return (
       <Row className="user-list">
         <Row className="user-list-wrapper">
@@ -239,14 +262,26 @@ class UsersList extends Component {
             </Col>
           </Row>
           <div className="container table-container">
-            {showPreloader ? (
-              <Skeleton active />
-            ) : (
-              <UserTable
-                getFilterValue={this.getFilterValue}
-                userData={tableData}
-                // filterValue={filterString}
-              />
+            {/* Table view */}
+            {viewValue === "tableView" && (
+              <div className="container table-container">
+                {showPreloader ? (
+                  <Skeleton active />
+                ) : (
+                  <UserTable
+                    getFilterValue={this.getFilterValue}
+                    userData={tableData}
+                    handleAddFavorite={addUserToFavorite}
+                    handleDeleteFavorite={deleteUserFromFavorite}
+                    favoriteList={favoriteList}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Preview with video view */}
+            {viewValue === "preview" && (
+              <div className="user-card_wrapper">{renderPreviewCard}</div>
             )}
           </div>
         </Row>
