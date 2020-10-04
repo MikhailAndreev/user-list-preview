@@ -180,7 +180,6 @@ class UserTable extends Component {
         key: "phone",
       },
       {
-        // title: "Phone",
         dataIndex: "favourite",
         key: "favourite",
         render: (text, record) => (
